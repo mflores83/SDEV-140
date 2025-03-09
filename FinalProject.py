@@ -18,7 +18,8 @@ class MainWindow(tk.Tk):
         self.title("What's For Dinner?")
         self.geometry("600x400")
 
-        label = tk.Label(self, text = "What's For Dinner?")
+        #Label on the main window that welcomes the user
+        label = tk.Label(self, text = "What's For Dinner? Let's find out!\nClick on any button to get started!")
         label.pack(pady=10)
 
         #Button that will link to add meal screen
@@ -29,15 +30,19 @@ class MainWindow(tk.Tk):
         self.button2 = tk.Button(self, text="Generate a Meal Plan", command=self.generateMealWindow)
         self.button2.pack(pady=5)
 
+        #Button that will link to See Meal Plan window
         self.button3 = tk.Button(self, text= "See Meal Plan", command= self.seePlan)
         self.button3.pack(pady=5)
 
-        self.allMeals = tk.Button(self, text = "See All Meals Added", command= self.allMealsList)
+        #Button open window that displays meals in file in a text and allows the user to delete them
+        self.allMeals = tk.Button(self, text = "See or Edit Meals Added", command= self.allMealsList)
         self.allMeals.pack(pady=5)
 
+        #Button that allows the user to close the window
         self.button4 = tk.Button(self, text= "Quit", command= self.exit)
         self.button4.pack(pady=5)
 
+        #File path for the "meals.txt" file because it would not find file in same folder
         self.filePath = "C:/Users/Admin/OneDrive/Documents/Spring 2025/SDEV-140/meals.txt"
         #Meals List for randomMeals
         self.mealsList = []
@@ -68,9 +73,7 @@ class MainWindow(tk.Tk):
     def submitMeal(self):
         "Will submit the meal entered by the user, and save it into a txt file."
         meal = self.mealName.get()
-        #Had to add file path because it would not find file in same folder.
-        self.filePath = "C:/Users/Admin/OneDrive/Documents/Spring 2025/SDEV-140/meals.txt"
-
+    
         #Checks for input and displays label
         if meal:
             with open(self.filePath,"a") as file:
@@ -150,7 +153,7 @@ class MainWindow(tk.Tk):
         "Will open a listbox window that displays all meals in file"
         self.allMealsWindow = tk.Toplevel(self)
         self.allMealsWindow.title = ("List of All Meals")
-        self.allMealsWindow.geometry("400x300")
+        self.allMealsWindow.geometry("400x400")
 
         self.label = tk.Label(self.allMealsWindow, text= "List of All Meals Added: ")
         self.label.pack(pady=5)
@@ -166,11 +169,32 @@ class MainWindow(tk.Tk):
         except FileNotFoundError:
             listbox.insert(tk.END, "No meals found. Please add meals first to display.")
 
+        self.deletedLabel = tk.Label(self.allMealsWindow, text= "")
+        self.deletedLabel.pack(pady=5)
+
         def deleteMeal():
             "Will add the option to delete a meal directly from the listbox window"
             #Source: https://stackoverflow.com/questions/31015774/removing-a-selection-from-a-listbox-as-well-as-remove-it-from-the-list-that-pro
+            #Allows the user to select the meal through listbox and will delete it in listbox with delete button
             selectedItems = listbox.curselection()
-            listbox.delete(selectedItems[0])
+            if selectedItems:
+                selectedMeal = listbox.get(selectedItems[0])
+                listbox.delete(selectedItems[0])
+
+                #Will delete meal in file if meal is the same as the selected meal in listbox
+                try:
+                    with open(self.filePath, "r") as file:
+                        meals = file.readlines()
+                    meals = [meal for meal in meals if meal.strip() != selectedMeal]
+
+                    with open(self.filePath, "w") as file:
+                        file.writelines(meals)
+                except FileNotFoundError:
+                    self.deletedLabel.config(text= "File not found. Please check the file path.")
+                self.deletedLabel.config(text= f"{selectedMeal} has been deleted.")
+            else:
+                self.deletedLabel.config(text= "No meal was selected.")
+
 
         self.deleteButton = tk.Button(self.allMealsWindow, text= "Delete Meal", command = deleteMeal)
         self.deleteButton.pack(pady=5)
