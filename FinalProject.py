@@ -10,6 +10,7 @@ Then it will pull from the information stored and print the required number of m
 import tkinter as tk
 
 class MainWindow(tk.Tk):
+    "Main window that will include all the main buttons to open up sub-windows"
     
     def __init__(self):
     
